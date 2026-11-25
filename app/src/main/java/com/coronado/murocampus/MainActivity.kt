@@ -56,7 +56,7 @@ fun MuroCampusApp() {
         val id = idSeleccionado
         when {
             creando -> PantallaCrear(vm, mod)
-            id != null -> PantallaDetalle(vm, id, mod)
+            id != null -> PantallaDetalle(vm, id, onVolver = { idSeleccionado = null }, modifier = mod)
             else -> PantallaLista(vm, onAbrir = { idSeleccionado = it }, modifier = mod)
         }
     }

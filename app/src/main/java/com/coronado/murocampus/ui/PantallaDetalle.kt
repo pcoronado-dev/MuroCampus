@@ -3,7 +3,10 @@ package com.coronado.murocampus.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,9 +20,14 @@ import com.coronado.murocampus.viewmodel.PostsViewModel
 import com.coronado.murocampus.viewmodel.UiState
 
 @Composable
-fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) {
+fun PantallaDetalle(vm: PostsViewModel, id: Int, onVolver: () -> Unit = {}, modifier: Modifier = Modifier) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
-    LaunchedEffect(id) { vm.abrir(id) }
+    val estadoEliminar by vm.eliminar.collectAsStateWithLifecycle()
+
+    LaunchedEffect(id) {
+        vm.abrir(id)
+        vm.limpiarEliminar()
+    }
 
     Box(modifier) {
         when (val e = estado) {
@@ -34,6 +42,31 @@ fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) 
                         fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(8.dp))
                     Text(e.datos.post.body)
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { vm.eliminar(id) },
+                        enabled = estadoEliminar !is UiState.Cargando,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Eliminar")
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    when (val elState = estadoEliminar) {
+                        UiState.Cargando -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        is UiState.Error -> Text(elState.mensaje, color = MaterialTheme.colorScheme.error)
+                        is UiState.Exito -> {
+                            Text("Publicación eliminada correctamente", color = MaterialTheme.colorScheme.primary)
+                            LaunchedEffect(Unit) {
+                                vm.limpiarEliminar()
+                                onVolver()
+                            }
+                        }
+                        null -> {}
+                    }
+
                     Spacer(Modifier.height(16.dp))
                     Text("Comentarios (${e.datos.comentarios.size})",
                         style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
