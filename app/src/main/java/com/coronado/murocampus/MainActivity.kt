@@ -1,38 +1,29 @@
 package com.coronado.murocampus
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.lifecycle.lifecycleScope
-import com.coronado.murocampus.data.remote.RetrofitClient
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.coronado.murocampus.ui.PantallaLista
 import com.coronado.murocampus.ui.theme.MuroCampusTheme
-import kotlinx.coroutines.launch
+import com.coronado.murocampus.viewmodel.PostsViewModel
+import com.coronado.murocampus.viewmodel.PostsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // ===== PRUEBA TEMPORAL PASO 4 (borrar antes del commit) =====
-        lifecycleScope.launch {
-            try {
-                val posts = RetrofitClient.api.listar()
-                Log.d("MuroCampus", "Llegaron ${posts.size} publicaciones")
-            } catch (e: Exception) {
-                Log.e("MuroCampus", "Falló la llamada: $e")
-            }
-        }
-        // ===== FIN PRUEBA TEMPORAL =====
-
         setContent {
             MuroCampusTheme {
+                val vm: PostsViewModel = viewModel(factory = PostsViewModelFactory())
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -43,7 +34,9 @@ class MainActivity : ComponentActivity() {
                             )
                         )
                     }
-                ) { }
+                ) { padding ->
+                    PantallaLista(vm, Modifier.padding(padding))
+                }
             }
         }
     }
