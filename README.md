@@ -51,3 +51,10 @@ El ViewModel debe gestionar el texto de búsqueda y proporcionar la lista filtra
 Antes de modificar el código, revisa cómo se obtienen y muestran actualmente las publicaciones. Reutiliza las clases y estructuras existentes, evita duplicar código y no alteres las funcionalidades que ya funcionan.
 
 Realiza los cambios directamente en los archivos correspondientes y verifica que el proyecto compile correctamente.
+
+
+
+<img width="540" height="1230" alt="WhatsApp Image 2026-11-25 at 1 50 50 AM (2)" src="https://github.com/user-attachments/assets/d8f338af-9979-48f4-b165-bd3013a1163a" />
+<img width="540" height="1230" alt="WhatsApp Image 2026-11-25 at 1 50 50 AM (1)" src="https://github.com/user-attachments/assets/8b0b81b1-fc59-4e8d-89b1-a61b1ffebf76" />
+<img width="540" height="1230" alt="WhatsApp Image 2026-11-25 at 1 50 50 AM" src="https://github.com/user-attachments/assets/c2e07fa8-71b5-46d2-8856-afb54315ed71" />
+
