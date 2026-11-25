@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coronado.murocampus.data.PostRepository
 import com.coronado.murocampus.model.Comentario
+import com.coronado.murocampus.model.NuevoPost
 import com.coronado.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -20,13 +21,17 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista: StateFlow<UiState<List<Post>>> = _lista.asStateFlow()
 
+    // PASO 8: filtro (null = Todos)
+    private val _usuarioFiltro = MutableStateFlow<Int?>(null)
+    val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+
     // PASO 7: detalle
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)
     val detalle: StateFlow<UiState<DetalleUi>> = _detalle.asStateFlow()
 
-    // PASO 8: filtro (null = Todos)
-    private val _usuarioFiltro = MutableStateFlow<Int?>(null)
-    val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+    // PASO 9: crear (null = aún no se envió)
+    private val _crear = MutableStateFlow<UiState<Post>?>(null)
+    val crear: StateFlow<UiState<Post>?> = _crear.asStateFlow()
 
     init { cargar() }
 
@@ -41,7 +46,6 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         }
     }
 
-    // PASO 8: guarda el filtro y recarga
     fun filtrar(userId: Int?) {
         _usuarioFiltro.value = userId
         cargar()
@@ -65,4 +69,15 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             }
         }
     }
+
+    fun publicar(titulo: String, texto: String) {
+        viewModelScope.launch {
+            _crear.value = UiState.Cargando
+            repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
+                .onSuccess { _crear.value = UiState.Exito(it) }
+                .onFailure { _crear.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun limpiarCrear() { _crear.value = null }
 }
