@@ -1,47 +1,50 @@
 package com.coronado.murocampus
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.coronado.murocampus.ui.theme.MurocampusTheme
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.lifecycle.lifecycleScope
+import com.coronado.murocampus.data.remote.RetrofitClient
+import com.coronado.murocampus.ui.theme.MuroCampusTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MurocampusTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+        // ===== PRUEBA TEMPORAL PASO 4 (borrar antes del commit) =====
+        lifecycleScope.launch {
+            try {
+                val posts = RetrofitClient.api.listar()
+                Log.d("MuroCampus", "Llegaron ${posts.size} publicaciones")
+            } catch (e: Exception) {
+                Log.e("MuroCampus", "Falló la llamada: $e")
             }
         }
-    }
-}
+        // ===== FIN PRUEBA TEMPORAL =====
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MurocampusTheme {
-        Greeting("Android")
+        setContent {
+            MuroCampusTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("MuroCampus") },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                ) { }
+            }
+        }
     }
 }
