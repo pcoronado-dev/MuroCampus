@@ -2,7 +2,9 @@ package com.coronado.murocampus
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -10,8 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.coronado.murocampus.ui.PantallaDetalle
 import com.coronado.murocampus.ui.PantallaLista
 import com.coronado.murocampus.ui.theme.MuroCampusTheme
 import com.coronado.murocampus.viewmodel.PostsViewModel
@@ -24,6 +31,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             MuroCampusTheme {
                 val vm: PostsViewModel = viewModel(factory = PostsViewModelFactory())
+                var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+
+                // El botón Atrás del sistema vuelve a la lista
+                BackHandler(enabled = idSeleccionado != null) {
+                    idSeleccionado = null
+                }
+
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -35,7 +49,14 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { padding ->
-                    PantallaLista(vm, Modifier.padding(padding))
+                    Box(Modifier.padding(padding)) {
+                        val id = idSeleccionado
+                        if (id == null) {
+                            PantallaLista(vm, onAbrir = { idSeleccionado = it })
+                        } else {
+                            PantallaDetalle(vm, id)
+                        }
+                    }
                 }
             }
         }
