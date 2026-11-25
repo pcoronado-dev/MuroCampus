@@ -37,6 +37,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _eliminar = MutableStateFlow<UiState<Unit>?>(null)
     val eliminar: StateFlow<UiState<Unit>?> = _eliminar.asStateFlow()
 
+    // Estado para actualizar / editar (null = aún no se envió)
+    private val _actualizar = MutableStateFlow<UiState<Post>?>(null)
+    val actualizar: StateFlow<UiState<Post>?> = _actualizar.asStateFlow()
+
     init { cargar() }
 
     fun cargar() {
@@ -103,4 +107,29 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     }
 
     fun limpiarEliminar() { _eliminar.value = null }
+
+    fun actualizar(post: Post) {
+        viewModelScope.launch {
+            _actualizar.value = UiState.Cargando
+            repo.actualizar(post.id, post)
+                .onSuccess { postActualizado ->
+                    _actualizar.value = UiState.Exito(postActualizado)
+                    val detalleActual = _detalle.value
+                    if (detalleActual is UiState.Exito) {
+                        _detalle.value = UiState.Exito(detalleActual.datos.copy(post = postActualizado))
+                    }
+                    val listaActual = _lista.value
+                    if (listaActual is UiState.Exito) {
+                        _lista.value = UiState.Exito(
+                            listaActual.datos.map { if (it.id == postActualizado.id) postActualizado else it }
+                        )
+                    }
+                }
+                .onFailure {
+                    _actualizar.value = UiState.Error(mensajeDe(it))
+                }
+        }
+    }
+
+    fun limpiarActualizar() { _actualizar.value = null }
 }

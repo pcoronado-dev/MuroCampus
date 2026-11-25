@@ -8,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -30,4 +31,7 @@ interface PostApi {
 
     @DELETE("posts/{id}")
     suspend fun eliminar(@Path("id") id: Int): Response<Unit>
+
+    @PUT("posts/{id}")
+    suspend fun actualizar(@Path("id") id: Int, @Body post: Post): Post
 }

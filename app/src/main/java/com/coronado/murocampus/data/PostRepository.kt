@@ -15,6 +15,7 @@ interface PostRepository {
     suspend fun porUsuario(userId: Int): Result<List<Post>>
     suspend fun crear(nuevo: NuevoPost): Result<Post>
     suspend fun eliminar(id: Int): Result<Unit>
+    suspend fun actualizar(id: Int, post: Post): Result<Post>
 }
 
 class PostRepositoryRemote(private val api: PostApi) : PostRepository {
@@ -39,4 +40,5 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
             throw HttpException(response)
         }
     }
+    override suspend fun actualizar(id: Int, post: Post) = llamar { api.actualizar(id, post) }
 }
