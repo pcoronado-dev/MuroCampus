@@ -9,8 +9,11 @@ import com.coronado.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class DetalleUi(val post: Post, val comentarios: List<Comentario>)
@@ -20,6 +23,33 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     // PASO 6: lista
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista: StateFlow<UiState<List<Post>>> = _lista.asStateFlow()
+
+    // Búsqueda local por título
+    private val _busquedaQuery = MutableStateFlow("")
+    val busquedaQuery: StateFlow<String> = _busquedaQuery.asStateFlow()
+
+    fun buscar(query: String) {
+        _busquedaQuery.value = query
+    }
+
+    val listaFiltrada: StateFlow<UiState<List<Post>>> = combine(_lista, _busquedaQuery) { estado, query ->
+        when (estado) {
+            is UiState.Cargando -> UiState.Cargando
+            is UiState.Error -> estado
+            is UiState.Exito -> {
+                val filtrados = if (query.isBlank()) {
+                    estado.datos
+                } else {
+                    estado.datos.filter { it.title.contains(query, ignoreCase = true) }
+                }
+                UiState.Exito(filtrados)
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _lista.value
+    )
 
     // PASO 8: filtro (null = Todos)
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
